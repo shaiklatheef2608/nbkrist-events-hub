@@ -18,7 +18,7 @@ This portal serves as the unified digital hub where institutional departments an
 * **Advanced Multi-Criteria Search**: Instantly filter collegiate activities by text keywords, specific department hosts, classification type, and dates.
 * **Native Calendar Date Picker**: Choose dates and set registration deadlines seamlessly using interactive native calendar pickers.
 * **Show/Hide Password Safety**: Enhanced user login and signup passwords feature high-visibility toggles for seamless accuracy.
-* **Institutional Domain Reset Shield**: Direct self-service password reset is restricted. Users are securely routed to contact the institutional domain administrator: `abdullatheefshaik4o@gmail.com`.
+* **Institutional Domain Reset Shield**: Direct self-service password reset is restricted. Users are securely routed to contact the institutional domain administrator: `shaiklatheef2608@gmail.com`.
 
 ---
 
@@ -84,5 +84,5 @@ npm run build
 ---
 
 ## 🔗 Institutional Administration
-* **Domain Administrator Email**: `abdullatheefshaik4o@gmail.com`
+* **Domain Administrator Email**: `shaiklatheef2608@gmail.com`
 * **Institutuion**: N.B.K.R. Institute of Science and Technology (NBKRIST), Autonomous, Estd. 1979.

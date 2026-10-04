@@ -35,7 +35,7 @@ export const HostForgotPasswordPage: React.FC = () => {
 
           <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800 select-all flex items-center justify-center gap-1.5">
             <Mail className="w-3.5 h-3.5 text-blue-700" />
-            <span>abdullatheefshaik4o@gmail.com</span>
+            <span>shaiklatheef2608@gmail.com</span>
           </div>
 
           <p className="text-[11px] text-slate-500 italic">

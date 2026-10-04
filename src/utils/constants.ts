@@ -1,5 +1,5 @@
 export const APPROVED_HOSTS: Record<string, string> = {
-  "abdullatheefshaik4o@gmail.com": "CSE NBKRIST",
+  "shaiklatheef2608@gmail.com": "Website Admin",
   "ist@nbkrist.org": "NBKRIST Main Institute",
   "istenbkrist@nbkrist.org": "ISTE SB NBKRST",
   "istesbnbkrist@nbkrist.org": "ISTE SB NBKRST",
@@ -15,6 +15,7 @@ export const APPROVED_HOSTS: Record<string, string> = {
 };
 
 export const APPROVED_ORGANIZATIONS = [
+  "Website Admin",
   "NBKRIST Main Institute",
   "UHV CELL NBKRST",
   "IEEE NBKRIST",
@@ -51,6 +52,7 @@ export const EVENT_TYPES = [
 ] as const;
 
 export const HOST_METADATA: Record<string, { type: string; department: string; code: string }> = {
+  "Website Admin": { type: "Central Administration", department: "Interdisciplinary & Central Chapters", code: "NBKR-ADMIN" },
   "NBKRIST Main Institute": { type: "Central Administration", department: "Interdisciplinary & Central Chapters", code: "NBKR-INST" },
   "CSE NBKRIST": { type: "Department", department: "Computer Science & Engineering", code: "NBKR-CSE" },
   "AIDS NBKRIST": { type: "Department", department: "Artificial Intelligence & Data Science", code: "NBKR-AIDS" },
