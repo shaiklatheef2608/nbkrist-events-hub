@@ -26,26 +26,34 @@ export const HostLoginPage: React.FC = () => {
     }
 
     setLoading(true);
-    const res = await login(email, password);
-    setLoading(false);
-
-    if (res.success) {
-      navigate('/host/dashboard');
-    } else {
-      setError(res.error || 'Login failed. Please verify credentials.');
+    try {
+      const res = await login(email, password);
+      if (res.success) {
+        navigate('/host/dashboard');
+      } else {
+        setError(res.error || 'Login failed. Please verify credentials.');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Login failed. Please verify credentials.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
     setError(null);
     setLoading(true);
-    const res = await loginWithGoogle();
-    setLoading(false);
-
-    if (res.success) {
-      navigate('/host/dashboard');
-    } else {
-      setError(res.error || 'Google sign-in failed.');
+    try {
+      const res = await loginWithGoogle();
+      if (res.success) {
+        navigate('/host/dashboard');
+      } else {
+        setError(res.error || 'Google sign-in failed.');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Google sign-in failed.');
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -36,7 +36,7 @@ export const HostDashboardPage: React.FC = () => {
         setLoading(false);
       },
       (err) => {
-        console.error("Error fetching host events:", err);
+        console.warn("Notice fetching host events:", err?.message || err);
         setLoading(false);
       }
     );

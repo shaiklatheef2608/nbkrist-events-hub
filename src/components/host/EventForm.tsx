@@ -66,19 +66,47 @@ export const EventForm: React.FC<EventFormProps> = ({
   const handleSubmit = async (targetStatus: EventStatus) => {
     setError(null);
 
-    if (!title.trim() || title.trim().length < 3) {
-      setError('Please provide an event title of at least 3 characters.');
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle || trimmedTitle.length < 3) {
+      setError('Please provide an event title between 3 and 200 characters.');
       return;
     }
-    if (!description.trim()) {
+    if (trimmedTitle.length > 200) {
+      setError('Event title cannot exceed 200 characters.');
+      return;
+    }
+
+    const trimmedDescription = description.trim();
+    if (!trimmedDescription) {
       setError('Please provide a complete description for the event.');
       return;
     }
+
     if (!date) {
       setError('Please specify the date of the event.');
       return;
     }
-    if (!venue.trim()) {
+
+    const eventDateObj = new Date(date);
+    if (isNaN(eventDateObj.getTime())) {
+      setError('Please enter a valid event date.');
+      return;
+    }
+
+    if (registrationDeadline) {
+      const deadlineObj = new Date(registrationDeadline);
+      if (isNaN(deadlineObj.getTime())) {
+        setError('Please enter a valid registration deadline date.');
+        return;
+      }
+      if (deadlineObj > eventDateObj) {
+        setError('Registration deadline cannot be after the event date.');
+        return;
+      }
+    }
+
+    const trimmedVenue = venue.trim();
+    if (!trimmedVenue) {
       setError('Please enter the venue/location on campus.');
       return;
     }
@@ -96,14 +124,37 @@ export const EventForm: React.FC<EventFormProps> = ({
       }
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (registrationMethod === 'email') {
-      if (!registrationEmail.trim()) {
-        setError('Please specify the registration contact email address.');
+      if (!registrationEmail.trim() || !emailRegex.test(registrationEmail.trim())) {
+        setError('Please specify a valid registration contact email address.');
         return;
       }
     } else {
       if (!registrationUrl.trim() || !registrationUrl.startsWith('http')) {
         setError('Please enter a valid URL beginning with https:// or http:// for registration.');
+        return;
+      }
+    }
+
+    if (coordinatorEmail.trim() && !emailRegex.test(coordinatorEmail.trim())) {
+      setError('Please enter a valid email format for the coordinator.');
+      return;
+    }
+
+    if (coordinatorPhone.trim()) {
+      const digitsOnly = coordinatorPhone.replace(/\D/g, '');
+      if (digitsOnly.length < 10) {
+        setError('Please enter a valid coordinator contact phone number (at least 10 digits).');
+        return;
+      }
+    }
+
+    if (registrationFee.trim()) {
+      const numMatch = registrationFee.match(/-?\d+(\.\d+)?/);
+      if (numMatch && parseFloat(numMatch[0]) < 0) {
+        setError('Registration fee cannot be negative.');
         return;
       }
     }
@@ -133,7 +184,16 @@ export const EventForm: React.FC<EventFormProps> = ({
         status: targetStatus
       }, targetStatus);
     } catch (err: any) {
-      setError(err.message || 'Failed to save event to database.');
+      let msg = err.message || 'Failed to save event to database.';
+      try {
+        const parsed = JSON.parse(err.message);
+        if (parsed.error && (parsed.error.includes('Missing or insufficient permissions') || parsed.error.includes('permission-denied'))) {
+          msg = 'Firestore Permission Notice: The event could not be published because Firestore security rules in your Firebase project need to allow this action. Please publish the rules from firestore.rules into your Firebase Console.';
+        }
+      } catch {
+        // Not a JSON error
+      }
+      setError(msg);
     } finally {
       setSubmitting(false);
     }

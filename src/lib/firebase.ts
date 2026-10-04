@@ -3,27 +3,30 @@ import { getAuth } from 'firebase/auth';
 import { initializeFirestore, getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import appletConfig from '../../firebase-applet-config.json';
 
+// Production Firebase Configuration for nbkrist-events-hub
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || appletConfig.apiKey,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || appletConfig.authDomain,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || appletConfig.projectId,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || appletConfig.messagingSenderId,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || appletConfig.appId,
-  firestoreDatabaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID || appletConfig.firestoreDatabaseId
+  apiKey: appletConfig.apiKey || "AIzaSyCtZro2n-g9yO7GXNVHWIAFVtd5NotD-3c",
+  authDomain: appletConfig.authDomain || "nbkrist-events-hub.firebaseapp.com",
+  projectId: appletConfig.projectId || "nbkrist-events-hub",
+  storageBucket: appletConfig.storageBucket || "nbkrist-events-hub.firebasestorage.app",
+  messagingSenderId: appletConfig.messagingSenderId || "402455512554",
+  appId: appletConfig.appId || "1:402455512554:web:9ff5e64db5786bb5b8de93",
+  firestoreDatabaseId: '(default)'
 };
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Ensure exactly one Firebase app instance
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
+// Firestore using (default) database with auto-detect long polling for cloud container stability
 export const db = (() => {
   try {
-    return initializeFirestore(app, {
-      experimentalAutoDetectLongPolling: true
-    }, firebaseConfig.firestoreDatabaseId);
+    return initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
   } catch {
-    return getFirestore(app, firebaseConfig.firestoreDatabaseId);
+    return getFirestore(app);
   }
 })();
 
+// Firebase Authentication using the same app instance
 export const auth = getAuth(app);
 
 // Connection test as required by skill guidelines

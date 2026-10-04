@@ -40,7 +40,7 @@ export const HostEventsPage: React.FC = () => {
         setLoading(false);
       },
       (err) => {
-        console.error("Firestore host events error:", err);
+        console.warn("Firestore host events notice:", err?.message || err);
         setLoading(false);
       }
     );

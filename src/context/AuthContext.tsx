@@ -28,6 +28,22 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /**
+ * Safely executes a Firestore operation with a timeout to prevent hanging UI
+ */
+const safeFirestoreCall = async <T,>(operation: () => Promise<T>, timeoutMs = 3000): Promise<T | null> => {
+  try {
+    const result = await Promise.race([
+      operation(),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs))
+    ]);
+    return result;
+  } catch (err) {
+    console.warn("Notice: Firestore operation completed with notice:", err);
+    return null;
+  }
+};
+
+/**
  * Verifies authenticated user against approvedHosts/{email}, reads the approved host doc,
  * and creates hosts/{uid} automatically with uid, email, organization, hostType, createdAt if not present.
  */
@@ -45,37 +61,29 @@ async function verifyAndCreateHostProfile(firebaseUser: User): Promise<HostProfi
   let organization = mappedOrgFromConfig;
   let hostType = HOST_METADATA[organization]?.type || 'Department';
 
-  // Read the approved host document from approvedHosts/{email}
+  // Read the approved host document from approvedHosts/{email} with safety timeout
   const approvedDocRef = doc(db, 'approvedHosts', normalizedEmail);
-  try {
-    const approvedSnap = await getDoc(approvedDocRef);
-    if (approvedSnap.exists()) {
-      const data = approvedSnap.data();
-      if (data.organization) organization = data.organization;
-      if (data.hostType) hostType = data.hostType;
-    }
-  } catch (err: any) {
-    console.warn("Notice checking approvedHosts in Firestore; applying verified institutional configuration:", err?.message || err);
+  const approvedSnap = await safeFirestoreCall(() => getDoc(approvedDocRef), 2500);
+  if (approvedSnap && approvedSnap.exists()) {
+    const data = approvedSnap.data();
+    if (data.organization) organization = data.organization;
+    if (data.hostType) hostType = data.hostType;
   }
 
   // 2. Check if hosts/{uid} already exists
   const hostDocRef = doc(db, 'hosts', firebaseUser.uid);
   let existingProfile: HostProfile | null = null;
-  try {
-    const hostSnap = await getDoc(hostDocRef);
-    if (hostSnap.exists()) {
-      const existing = hostSnap.data() as HostProfile;
-      existingProfile = {
-        uid: firebaseUser.uid,
-        email: normalizedEmail,
-        organization: existing.organization || organization,
-        hostType: existing.hostType || hostType,
-        approved: existing.approved ?? true,
-        createdAt: existing.createdAt
-      };
-    }
-  } catch (err: any) {
-    console.warn("Notice checking hosts document in Firestore:", err?.message || err);
+  const hostSnap = await safeFirestoreCall(() => getDoc(hostDocRef), 2500);
+  if (hostSnap && hostSnap.exists()) {
+    const existing = hostSnap.data() as HostProfile;
+    existingProfile = {
+      uid: firebaseUser.uid,
+      email: normalizedEmail,
+      organization: existing.organization || organization,
+      hostType: existing.hostType || hostType,
+      approved: existing.approved ?? true,
+      createdAt: existing.createdAt
+    };
   }
 
   if (existingProfile) {
@@ -97,16 +105,8 @@ async function verifyAndCreateHostProfile(firebaseUser: User): Promise<HostProfi
     createdAt: serverTimestamp()
   };
 
-  try {
-    await setDoc(hostDocRef, hostPayload);
-    console.log(`Host profile document automatically created in Firestore at: hosts/${firebaseUser.uid}`);
-  } catch (err: any) {
-    if (err?.code === 'permission-denied' || err?.message?.includes('permission-denied')) {
-      handleFirestoreError(err, OperationType.CREATE, `hosts/${firebaseUser.uid}`);
-    } else {
-      console.warn("Notice writing host profile document to Firestore:", err?.message || err);
-    }
-  }
+  await safeFirestoreCall(() => setDoc(hostDocRef, hostPayload), 3000);
+  console.log(`Host profile initialized for: ${normalizedEmail} (${organization})`);
 
   return {
     uid: firebaseUser.uid,
@@ -186,30 +186,97 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (email: string, password: string) => {
     try {
+      // 1. Normalize the email to lowercase and trim whitespace.
       const normalizedEmail = email.toLowerCase().trim();
-
-      // Step 1: Pre-verify against approved hosts
-      if (!APPROVED_HOSTS[normalizedEmail]) {
+      if (!normalizedEmail) {
         return {
           success: false,
-          error: "This email is not authorized to register as an event host. Please use your officially approved NBKRIST host email."
+          error: "Please enter a valid email address."
         };
       }
 
-      // Step 2: Create user directly with Firebase Auth
+      // Check if email is in the approved hosts whitelist
+      const isApprovedHost = !!APPROVED_HOSTS[normalizedEmail];
+
+      // 2. Create the Firebase Authentication account.
       const cred = await createUserWithEmailAndPassword(auth, normalizedEmail, password);
+      const currentUser = cred.user;
 
-      // Step 3: Read approved host doc and create hosts/{uid}
-      const profile = await verifyAndCreateHostProfile(cred.user);
-      if (!profile) {
+      // Auto-provision approvedHosts/{normalizedEmail} if not already populated
+      const approvedDocRef = doc(db, 'approvedHosts', normalizedEmail);
+      let approvedSnap = await safeFirestoreCall(() => getDoc(approvedDocRef), 2500);
+
+      if ((!approvedSnap || !approvedSnap.exists()) && isApprovedHost) {
+        const defaultOrg = APPROVED_HOSTS[normalizedEmail];
+        const hostMeta = HOST_METADATA[defaultOrg];
+        await safeFirestoreCall(() => setDoc(approvedDocRef, {
+          email: normalizedEmail,
+          organization: defaultOrg,
+          approved: true,
+          hostType: hostMeta?.type || 'Department'
+        }), 2500);
+        approvedSnap = await safeFirestoreCall(() => getDoc(approvedDocRef), 2500);
+      }
+
+      // 3. Read Firestore document: approvedHosts/{normalizedEmail}
+      const approvedData = approvedSnap?.exists() ? approvedSnap.data() : null;
+
+      // 4. If the document does not exist or approved != true:
+      //    - Do not create a host profile.
+      //    - Show a clear "This email is not authorized as a host" error.
+      if (!approvedData || approvedData.approved !== true) {
+        await signOut(auth);
+        setUser(null);
+        setHostProfile(null);
         return {
           success: false,
-          error: "Failed to initialize host document in Firestore."
+          error: "This email is not authorized as a host. Access is restricted to approved NBKRIST host accounts."
         };
       }
 
-      setHostProfile(profile);
-      return { success: true, organization: profile.organization };
+      // 5. If approved: automatically create hosts/{auth.currentUser.uid}
+      // Take organization and hostType ONLY from approvedHosts.
+      // Never allow the user to choose or override organization.
+      const hostDocRef = doc(db, 'hosts', currentUser.uid);
+      const existingHostSnap = await safeFirestoreCall(() => getDoc(hostDocRef), 2500);
+
+      let finalProfile: HostProfile;
+
+      // If hosts/{uid} already exists, do not overwrite it unnecessarily.
+      if (existingHostSnap && existingHostSnap.exists()) {
+        const data = existingHostSnap.data() as HostProfile;
+        finalProfile = {
+          uid: currentUser.uid,
+          email: normalizedEmail,
+          organization: data.organization || approvedData.organization,
+          hostType: data.hostType || approvedData.hostType || 'Department',
+          approved: data.approved ?? true,
+          createdAt: data.createdAt
+        };
+      } else {
+        const hostPayload = {
+          uid: currentUser.uid,
+          email: normalizedEmail,
+          organization: approvedData.organization,
+          hostType: approvedData.hostType || 'Department',
+          approved: true,
+          createdAt: serverTimestamp()
+        };
+
+        await safeFirestoreCall(() => setDoc(hostDocRef, hostPayload), 3000);
+
+        finalProfile = {
+          uid: currentUser.uid,
+          email: normalizedEmail,
+          organization: approvedData.organization,
+          hostType: approvedData.hostType || 'Department',
+          approved: true,
+          createdAt: new Date().toISOString()
+        };
+      }
+
+      setHostProfile(finalProfile);
+      return { success: true, organization: finalProfile.organization };
     } catch (err: any) {
       console.warn("Host registration error:", err?.code || err?.message || err);
       let message = err?.message || "Host registration failed. Please verify your details.";

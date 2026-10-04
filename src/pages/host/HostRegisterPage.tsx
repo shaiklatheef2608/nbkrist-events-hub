@@ -39,26 +39,34 @@ export const HostRegisterPage: React.FC = () => {
     }
 
     setLoading(true);
-    const res = await register(email, password);
-    setLoading(false);
-
-    if (res.success) {
-      navigate('/host/dashboard');
-    } else {
-      setError(res.error || 'Failed to complete host registration.');
+    try {
+      const res = await register(email, password);
+      if (res.success) {
+        navigate('/host/dashboard');
+      } else {
+        setError(res.error || 'Failed to complete host registration.');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to complete host registration.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
     setError(null);
     setLoading(true);
-    const res = await loginWithGoogle();
-    setLoading(false);
-
-    if (res.success) {
-      navigate('/host/dashboard');
-    } else {
-      setError(res.error || 'Google sign-in failed.');
+    try {
+      const res = await loginWithGoogle();
+      if (res.success) {
+        navigate('/host/dashboard');
+      } else {
+        setError(res.error || 'Google sign-in failed.');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Google sign-in failed.');
+    } finally {
+      setLoading(false);
     }
   };
 

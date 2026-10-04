@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { EventForm } from '../../components/host/EventForm';
 import { createInstitutionalEvent } from '../../lib/firestore';
 import { NBKRISTEvent, EventStatus } from '../../types';
+import { APPROVED_HOSTS } from '../../utils/constants';
 import { PlusCircle, ShieldCheck } from 'lucide-react';
 
 export const HostCreateEventPage: React.FC = () => {
@@ -14,7 +15,10 @@ export const HostCreateEventPage: React.FC = () => {
     data: Omit<NBKRISTEvent, 'eventId' | 'createdBy' | 'createdAt' | 'updatedAt'>,
     status: EventStatus
   ) => {
-    if (!user || !hostProfile) throw new Error('Host session not authenticated.');
+    if (!user) throw new Error('Host session not authenticated.');
+
+    const normalizedEmail = (user.email || '').toLowerCase().trim();
+    const org = hostProfile?.organization || APPROVED_HOSTS[normalizedEmail] || 'NBKRIST Host';
 
     await createInstitutionalEvent(
       {
@@ -22,7 +26,7 @@ export const HostCreateEventPage: React.FC = () => {
         status
       },
       user.uid,
-      hostProfile.organization
+      org
     );
 
     navigate('/host/events');

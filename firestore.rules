@@ -15,45 +15,27 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
-    function isWhitelistedHostEmail(email) {
-      return email.lower() in [
-        'abdullatheefshaik4o@gmail.com',
-        'uhvcellnbkrist@nbkrist.org',
-        'ieeenbkrist@nbkrist.org',
-        'istesbnbkrist@nbkrist.org',
-        'iicnbkrist@nbkrist.org',
-        'csenbkrist@nbkrist.org',
-        'mechnbkrist@nbkrist.org',
-        'eeenbkrist@nbkrist.org',
-        'ecenbkrist@nbkrist.org',
-        'aidsnbkrist@nbkrist.org',
-        'civilnbkrist@nbkrist.org'
-      ];
+    function isSuperAdmin() {
+      return isSignedIn() && request.auth.token.email.lower() == 'abdullatheefshaik4o@gmail.com';
     }
 
-    function getExpectedOrg(email) {
+    function isApprovedHostDocValid(email, data) {
       let lower = email.lower();
-      return lower == 'abdullatheefshaik4o@gmail.com' ? 'CSE NBKRIST' :
-             lower == 'uhvcellnbkrist@nbkrist.org' ? 'UHV CELL NBKRST' :
-             lower == 'ieeenbkrist@nbkrist.org' ? 'IEEE NBKRIST' :
-             lower == 'istesbnbkrist@nbkrist.org' ? 'ISTE SB NBKRST' :
-             lower == 'iicnbkrist@nbkrist.org' ? 'IIC NBKRIST' :
-             lower == 'csenbkrist@nbkrist.org' ? 'CSE NBKRIST' :
-             lower == 'mechnbkrist@nbkrist.org' ? 'MECH NBKRIST' :
-             lower == 'eeenbkrist@nbkrist.org' ? 'EEE NBKRIST' :
-             lower == 'ecenbkrist@nbkrist.org' ? 'ECE NBKRIST' :
-             lower == 'aidsnbkrist@nbkrist.org' ? 'AIDS NBKRIST' :
-             lower == 'civilnbkrist@nbkrist.org' ? 'CIVIL NBKRIST' : '';
+      return (lower == 'csenbkrist@nbkrist.org' && data.organization == 'CSE NBKRIST') ||
+             (lower == 'uhvcellnbkrist@nbkrist.org' && data.organization == 'UHV CELL NBKRST') ||
+             (lower == 'ieeenbkrist@nbkrist.org' && data.organization == 'IEEE NBKRIST') ||
+             (lower == 'istesbnbkrist@nbkrist.org' && data.organization == 'ISTE SB NBKRST') ||
+             (lower == 'iicnbkrist@nbkrist.org' && data.organization == 'IIC NBKRIST') ||
+             (lower == 'mechnbkrist@nbkrist.org' && data.organization == 'MECH NBKRIST') ||
+             (lower == 'eeenbkrist@nbkrist.org' && data.organization == 'EEE NBKRIST') ||
+             (lower == 'ecenbkrist@nbkrist.org' && data.organization == 'ECE NBKRIST') ||
+             (lower == 'aidsnbkrist@nbkrist.org' && data.organization == 'AIDS NBKRIST') ||
+             (lower == 'civilnbkrist@nbkrist.org' && data.organization == 'CIVIL NBKRIST') ||
+             (lower == 'abdullatheefshaik4o@gmail.com' && data.organization == 'CSE NBKRIST');
     }
 
-    function getHostDoc() {
-      return get(/databases/$(database)/documents/hosts/$(request.auth.uid)).data;
-    }
-
-    function isHostApproved() {
-      return isSignedIn() && 
-        exists(/databases/$(database)/documents/hosts/$(request.auth.uid)) &&
-        isWhitelistedHostEmail(request.auth.token.email);
+    function getApprovedHostDoc(email) {
+      return get(/databases/$(database)/documents/approvedHosts/$(email)).data;
     }
 
     // Health check endpoint
@@ -61,56 +43,78 @@ service cloud.firestore {
       allow read: if true;
     }
 
-    // Whitelist registry: publicly readable, writable for whitelisted emails
+    // Whitelist registry: Only trusted administrative provisioning or verified institutional binding can modify
     match /approvedHosts/{email} {
       allow get, list: if true;
-      allow write: if isWhitelistedHostEmail(email);
+      allow write: if isSuperAdmin() || (
+        isSignedIn() && 
+        isApprovedHostDocValid(email.lower(), request.resource.data) &&
+        request.resource.data.approved == true
+      );
     }
 
     // Host profiles: each host can read and manage their own document
+    // Host can create hosts/{uid} only when their authenticated email exists in approvedHosts
+    // and the submitted organization and hostType exactly match the approvedHosts document.
     match /hosts/{uid} {
-      allow get: if isOwner(uid);
+      allow get: if isSignedIn() && (request.auth.uid == uid || isSuperAdmin());
       allow list: if isSignedIn();
-      // Allow host to register/create profile if their email is in the whitelist and matches their token
-      allow create, update: if isOwner(uid) && 
+      allow create: if isSignedIn() && 
+        request.auth.uid == uid &&
+        exists(/databases/$(database)/documents/approvedHosts/$(request.auth.token.email.lower())) &&
+        getApprovedHostDoc(request.auth.token.email.lower()).approved == true &&
         request.resource.data.uid == uid &&
-        isWhitelistedHostEmail(request.auth.token.email) &&
         request.resource.data.email.lower() == request.auth.token.email.lower() &&
-        request.resource.data.organization == getExpectedOrg(request.auth.token.email);
-      allow delete: if false;
+        request.resource.data.approved == true &&
+        request.resource.data.organization == getApprovedHostDoc(request.auth.token.email.lower()).organization &&
+        request.resource.data.hostType == getApprovedHostDoc(request.auth.token.email.lower()).hostType;
+
+      // Cannot change uid, email, organization, hostType, or approved status
+      allow update: if isSignedIn() && 
+        (request.auth.uid == uid || isSuperAdmin()) &&
+        request.resource.data.uid == resource.data.uid &&
+        request.resource.data.email.lower() == resource.data.email.lower() &&
+        request.resource.data.organization == resource.data.organization &&
+        request.resource.data.hostType == resource.data.hostType &&
+        request.resource.data.approved == resource.data.approved;
+
+      allow delete: if isSuperAdmin();
     }
 
-    // General user profiles
+    // General user profiles (students/attendees)
     match /users/{uid} {
       allow get, update, delete: if isOwner(uid);
       allow create: if isOwner(uid) && request.resource.data.uid == uid;
       allow list: if false;
     }
 
-    // Institutional Events: All institutional events are readable by public/students
+    // Institutional Events: Public can browse published events
     match /events/{eventId} {
+      // Public users can read and list events
       allow get, list: if true;
 
-      // Host can create event only for their authenticated organization
-      allow create: if isHostApproved() && 
+      // Approved hosts may create events only as themselves for their trusted organization
+      allow create: if isSignedIn() && 
         request.resource.data.createdBy == request.auth.uid &&
-        request.resource.data.organization == getHostDoc().organization &&
+        exists(/databases/$(database)/documents/approvedHosts/$(request.auth.token.email.lower())) &&
+        getApprovedHostDoc(request.auth.token.email.lower()).approved == true &&
+        request.resource.data.organization == getApprovedHostDoc(request.auth.token.email.lower()).organization &&
         request.resource.data.title is string &&
         request.resource.data.title.size() >= 3 &&
-        request.resource.data.title.size() <= 200 &&
-        request.resource.data.status in ['draft', 'published', 'registration_open', 'registration_closed', 'completed'];
+        request.resource.data.title.size() <= 200;
 
-      // Host can update only events created by them, cannot change createdBy or organization
-      allow update: if isHostApproved() && 
-        resource.data.createdBy == request.auth.uid &&
+      // Update: Cannot change createdBy, cannot change event organization. Host A cannot edit Host B's events.
+      allow update: if isSignedIn() && 
+        (resource.data.createdBy == request.auth.uid || isSuperAdmin()) &&
         request.resource.data.createdBy == resource.data.createdBy &&
         request.resource.data.organization == resource.data.organization &&
         request.resource.data.title is string &&
         request.resource.data.title.size() >= 3 &&
         request.resource.data.title.size() <= 200;
 
-      // Host can delete only their own events
-      allow delete: if isHostApproved() && resource.data.createdBy == request.auth.uid;
+      // Delete: Can only delete events they are authorized to manage
+      allow delete: if isSignedIn() && 
+        (resource.data.createdBy == request.auth.uid || isSuperAdmin());
     }
   }
 }

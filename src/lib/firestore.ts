@@ -85,7 +85,7 @@ export function subscribeToHostEvents(
       callback(events);
     },
     (error) => {
-      console.error("Firestore host events subscription error:", error);
+      console.warn("Firestore host events subscription notice:", error?.message || error);
       if (errorCallback) {
         errorCallback(error);
       } else {

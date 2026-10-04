@@ -1,12 +1,12 @@
 {
-  "projectId": "zippy-unfolding-ghl8x",
-  "appId": "1:450496521727:web:b807da52f5926c69d073ca",
-  "apiKey": "AIzaSyCi4KYs81u1TT7a0uDc4mNAKMzuQA032Q4",
-  "authDomain": "zippy-unfolding-ghl8x.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-d4ef755c-ecbf-4286-8297-6217c851af65",
-  "storageBucket": "zippy-unfolding-ghl8x.firebasestorage.app",
-  "messagingSenderId": "450496521727",
+  "projectId": "nbkrist-events-hub",
+  "appId": "1:402455512554:web:9ff5e64db5786bb5b8de93",
+  "apiKey": "AIzaSyCtZro2n-g9yO7GXNVHWIAFVtd5NotD-3c",
+  "authDomain": "nbkrist-events-hub.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "nbkrist-events-hub.firebasestorage.app",
+  "messagingSenderId": "402455512554",
   "measurementId": "",
-  "oAuthClientId": "450496521727-p4pi384cqhk7akphdsur3ptahle916ep.apps.googleusercontent.com",
+  "oAuthClientId": "",
   "recaptchaSiteKey": ""
 }
