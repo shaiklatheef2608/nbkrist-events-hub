@@ -1,5 +1,4 @@
 import React from 'react';
-import officialLogo from '../../assets/images/nbkrist_crest_logo_1791110233742.jpg';
 
 interface NBKRISTLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -28,12 +27,10 @@ export const NBKRISTLogo: React.FC<NBKRISTLogoProps> = ({
     <div className={`flex items-center gap-3 ${className}`}>
       <div className={`${sizeMap[size]} shrink-0 flex items-center justify-center p-0.5 rounded-full bg-white shadow-xs border border-slate-200/80 overflow-hidden`}>
         <img 
-          src={officialLogo} 
+          src="/logo/nbkrist-logo.jpg" 
           alt="N.B.K.R. Institute of Science and Technology Official Seal" 
-          referrerPolicy="no-referrer"
           className="w-full h-full object-contain"
           onError={(e) => {
-            // Fallback to static public logo
             e.currentTarget.src = "/logo/nbkrist-logo.svg";
           }}
         />
@@ -41,8 +38,8 @@ export const NBKRISTLogo: React.FC<NBKRISTLogoProps> = ({
 
       {showText && (
         <div className="flex flex-col">
-          <span className={`font-extrabold tracking-tight leading-none ${size === 'lg' ? 'text-xl' : size === 'sm' ? 'text-sm' : 'text-base'} ${titleColor}`}>
-            NBKRIST Events Hub
+          <span className={`font-black tracking-tight uppercase leading-none whitespace-nowrap ${size === 'lg' ? 'text-xl' : size === 'sm' ? 'text-sm' : 'text-base'} ${titleColor}`}>
+            NBKRIST EVENTS HUB
           </span>
           <span className={`text-[10px] font-semibold tracking-wider uppercase mt-1 ${subtitleColor}`}>
             Autonomous Institution • Established 1979
@@ -52,4 +49,5 @@ export const NBKRISTLogo: React.FC<NBKRISTLogoProps> = ({
     </div>
   );
 };
+
 export default NBKRISTLogo;

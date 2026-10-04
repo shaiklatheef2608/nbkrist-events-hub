@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, MapPin, Tag } from 'lucide-react';
 import { NBKRISTEvent } from '../../types';
+import { addRecentlyViewedEvent } from '../../utils/recentlyViewed';
 
 interface CollegiateEventCardProps {
   event: NBKRISTEvent;
@@ -45,6 +46,7 @@ export const CollegiateEventCard: React.FC<CollegiateEventCardProps> = ({
   const handleCardClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (!target.closest('button') && !target.closest('a')) {
+      addRecentlyViewedEvent(event);
       navigate(`/events/${event.eventId}`);
     }
   };

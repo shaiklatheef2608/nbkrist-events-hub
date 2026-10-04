@@ -6,7 +6,7 @@ import { HomePage } from './pages/public/HomePage';
 import { EventsPage } from './pages/public/EventsPage';
 import { EventDetailsPage } from './pages/public/EventDetailsPage';
 import { SearchPage } from './pages/public/SearchPage';
-import { MyRegistrationsPage } from './pages/public/MyRegistrationsPage';
+import { ViewedEventsPage } from './pages/public/ViewedEventsPage';
 
 import { HostLoginPage } from './pages/host/HostLoginPage';
 import { HostRegisterPage } from './pages/host/HostRegisterPage';
@@ -44,7 +44,8 @@ export default function App() {
             <Route path="/events" element={<EventsPage />} />
             <Route path="/events/:eventId" element={<EventDetailsPage />} />
             <Route path="/search" element={<SearchPage />} />
-            <Route path="/my-registrations" element={<MyRegistrationsPage />} />
+            <Route path="/viewed-events" element={<ViewedEventsPage />} />
+            <Route path="/my-registrations" element={<Navigate to="/viewed-events" replace />} />
 
             {/* Public Host Authentication Pages */}
             <Route path="/host/login" element={<HostLoginPage />} />

@@ -14,6 +14,7 @@ import { NBKRISTEvent } from '../../types';
 import { StatusBadge } from '../common/StatusBadge';
 import { RegisterButton } from '../common/RegisterButton';
 import { HOST_METADATA } from '../../utils/constants';
+import { addRecentlyViewedEvent } from '../../utils/recentlyViewed';
 
 interface EventCardProps {
   event: NBKRISTEvent;
@@ -29,6 +30,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
     // Navigate to event details if not clicking an interactive action button
     const target = e.target as HTMLElement;
     if (!target.closest('button') && !target.closest('a')) {
+      addRecentlyViewedEvent(event);
       navigate(`/events/${event.eventId}`);
     }
   };

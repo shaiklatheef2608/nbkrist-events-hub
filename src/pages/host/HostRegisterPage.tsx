@@ -7,7 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { APPROVED_HOSTS } from '../../utils/constants';
 
 export const HostRegisterPage: React.FC = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('ist@nbkrist.org');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -91,16 +91,6 @@ export const HostRegisterPage: React.FC = () => {
 
         {/* Form Card */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-md p-6 sm:p-8 space-y-5">
-          
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 text-xs">
-            <span className="font-mono text-slate-500 uppercase tracking-wider text-[11px]">
-              Host Enrollment
-            </span>
-            <span className="inline-flex items-center gap-1 font-mono text-blue-700 bg-blue-50 px-2 py-0.5 rounded-xs border border-blue-200 text-[10px]">
-              <Lock className="w-3 h-3" />
-              Whitelist Guarded
-            </span>
-          </div>
 
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md flex items-start gap-2.5 text-xs text-red-700">
@@ -114,13 +104,13 @@ export const HostRegisterPage: React.FC = () => {
             {/* Official Host Email */}
             <div>
               <label className="block text-[11px] font-mono uppercase text-slate-600 mb-1">
-                Official Host Email
+                Host Email Address
               </label>
               <div className="relative">
                 <input
                   type="email"
                   required
-                  placeholder="e.g. csenbkrist@nbkrist.org"
+                  placeholder="organization mail e.g. csenbkrist@nbkrist.org"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full text-xs font-mono bg-slate-50 border border-slate-200 rounded-md py-2.5 px-3 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-blue-600"

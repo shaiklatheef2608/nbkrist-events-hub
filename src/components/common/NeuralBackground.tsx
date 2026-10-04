@@ -1,76 +1,198 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface NeuralBackgroundProps {
   className?: string;
-  intensity?: 'subtle' | 'medium';
+  intensity?: 'subtle' | 'medium' | 'high';
+}
+
+interface Node {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
+  baseRadius: number;
+  pulsePhase: number;
+  pulseSpeed: number;
+}
+
+interface Pulse {
+  fromIndex: number;
+  toIndex: number;
+  progress: number;
+  speed: number;
 }
 
 export const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ 
   className = '',
-  intensity = 'subtle' 
+  intensity = 'medium' 
 }) => {
-  const opacity = intensity === 'subtle' ? 'opacity-25' : 'opacity-40';
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    let width = (canvas.width = canvas.parentElement?.clientWidth || window.innerWidth);
+    let height = (canvas.height = canvas.parentElement?.clientHeight || 500);
+
+    const handleResize = () => {
+      if (!canvas) return;
+      width = canvas.width = canvas.parentElement?.clientWidth || window.innerWidth;
+      height = canvas.height = canvas.parentElement?.clientHeight || 500;
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    const nodeCount = Math.floor((width * height) / (intensity === 'subtle' ? 14000 : 9000));
+    const nodes: Node[] = [];
+
+    for (let i = 0; i < Math.max(30, nodeCount); i++) {
+      const radius = 2 + Math.random() * 2.5;
+      nodes.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: (Math.random() - 0.5) * 0.8,
+        radius,
+        baseRadius: radius,
+        pulsePhase: Math.random() * Math.PI * 2,
+        pulseSpeed: 0.02 + Math.random() * 0.03
+      });
+    }
+
+    const pulses: Pulse[] = [];
+    const maxConnectionDistance = 160;
+
+    const spawnPulse = () => {
+      if (nodes.length < 2) return;
+      const fromIndex = Math.floor(Math.random() * nodes.length);
+      const nearbyIndices: number[] = [];
+      nodes.forEach((n, idx) => {
+        if (idx === fromIndex) return;
+        const dx = n.x - nodes[fromIndex].x;
+        const dy = n.y - nodes[fromIndex].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < maxConnectionDistance) {
+          nearbyIndices.push(idx);
+        }
+      });
+
+      if (nearbyIndices.length > 0) {
+        const toIndex = nearbyIndices[Math.floor(Math.random() * nearbyIndices.length)];
+        pulses.push({
+          fromIndex,
+          toIndex,
+          progress: 0,
+          speed: 0.015 + Math.random() * 0.02
+        });
+      }
+    };
+
+    const pulseInterval = setInterval(spawnPulse, 300);
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      // 1. Update positions & pulse scale
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        node.x += node.vx;
+        node.y += node.vy;
+
+        if (node.x < 0 || node.x > width) node.vx *= -1;
+        if (node.y < 0 || node.y > height) node.vy *= -1;
+
+        node.pulsePhase += node.pulseSpeed;
+        node.radius = node.baseRadius + Math.sin(node.pulsePhase) * 0.8;
+      }
+
+      // 2. Draw connections
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[j].x - nodes[i].x;
+          const dy = nodes[j].y - nodes[i].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < maxConnectionDistance) {
+            const alpha = (1 - dist / maxConnectionDistance) * 0.35;
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // 3. Render moving signal pulses along lines
+      for (let i = pulses.length - 1; i >= 0; i--) {
+        const p = pulses[i];
+        p.progress += p.speed;
+
+        if (p.progress >= 1) {
+          pulses.splice(i, 1);
+          continue;
+        }
+
+        const fromNode = nodes[p.fromIndex];
+        const toNode = nodes[p.toIndex];
+        if (!fromNode || !toNode) {
+          pulses.splice(i, 1);
+          continue;
+        }
+
+        const px = fromNode.x + (toNode.x - fromNode.x) * p.progress;
+        const py = fromNode.y + (toNode.y - fromNode.y) * p.progress;
+
+        ctx.beginPath();
+        ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(125, 211, 252, 0.95)';
+        ctx.shadowColor = '#38bdf8';
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      // 4. Draw nodes & glowing halos
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.radius * 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fill();
+      }
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearInterval(pulseInterval);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [intensity]);
+
+  const opacity = intensity === 'subtle' ? 'opacity-40' : 'opacity-70';
 
   return (
     <div className={`absolute inset-0 pointer-events-none overflow-hidden select-none ${opacity} ${className}`}>
-      <svg
-        className="w-full h-full"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 1440 600"
-        preserveAspectRatio="xMidYMid slice"
-      >
-        <defs>
-          <linearGradient id="neural-line-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />
-            <stop offset="50%" stopColor="#818cf8" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0.4" />
-          </linearGradient>
-          <pattern id="tech-dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
-            <circle cx="2" cy="2" r="1" fill="#38bdf8" fillOpacity="0.18" />
-          </pattern>
-        </defs>
-
-        {/* Dot pattern grid */}
-        <rect width="100%" height="100%" fill="url(#tech-dots)" />
-
-        {/* Neural network lines and nodes */}
-        <g stroke="url(#neural-line-grad)" strokeWidth="1" fill="none">
-          <path d="M 80,120 L 220,180 L 380,110 L 540,230 L 720,160 L 910,240 L 1100,140 L 1320,220" />
-          <path d="M 220,180 L 260,340 L 440,380 L 540,230 L 680,390 L 880,360 L 910,240" />
-          <path d="M 380,110 L 440,380 L 620,480 L 720,160" />
-          <path d="M 720,160 L 840,90 L 1100,140 L 1260,80 L 1320,220" />
-          <path d="M 680,390 L 880,360 L 1020,440 L 1200,380 L 1320,220" />
-          <path d="M 120,420 L 260,340 L 440,380" />
-          <path d="M 1020,440 L 1260,510 L 1380,380" />
-        </g>
-
-        {/* Subtle geometric nodes */}
-        <g fill="#38bdf8">
-          <circle cx="80" cy="120" r="3" fillOpacity="0.6" />
-          <circle cx="220" cy="180" r="4" fillOpacity="0.8" />
-          <circle cx="380" cy="110" r="3.5" fillOpacity="0.7" />
-          <circle cx="540" cy="230" r="4.5" fillOpacity="0.9" />
-          <circle cx="720" cy="160" r="5" fillOpacity="1" />
-          <circle cx="910" cy="240" r="4" fillOpacity="0.8" />
-          <circle cx="1100" cy="140" r="3.5" fillOpacity="0.7" />
-          <circle cx="1320" cy="220" r="4.5" fillOpacity="0.8" />
-          <circle cx="260" cy="340" r="3" fillOpacity="0.6" />
-          <circle cx="440" cy="380" r="4" fillOpacity="0.7" />
-          <circle cx="680" cy="390" r="3.5" fillOpacity="0.6" />
-          <circle cx="880" cy="360" r="4" fillOpacity="0.7" />
-          <circle cx="1020" cy="440" r="3.5" fillOpacity="0.7" />
-          <circle cx="1200" cy="380" r="3" fillOpacity="0.6" />
-          <circle cx="840" cy="90" r="2.5" fillOpacity="0.5" />
-          <circle cx="1260" cy="80" r="3" fillOpacity="0.5" />
-        </g>
-
-        {/* Halo pulses around major nodes */}
-        <g stroke="#38bdf8" strokeWidth="1" fill="none">
-          <circle cx="540" cy="230" r="10" strokeOpacity="0.3" strokeDasharray="3 3" />
-          <circle cx="720" cy="160" r="12" strokeOpacity="0.4" strokeDasharray="4 4" />
-          <circle cx="910" cy="240" r="9" strokeOpacity="0.3" strokeDasharray="3 3" />
-        </g>
-      </svg>
+      <canvas ref={canvasRef} className="w-full h-full block" />
     </div>
   );
 };
+
+export default NeuralBackground;

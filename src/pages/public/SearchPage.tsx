@@ -7,11 +7,10 @@ import { EmptyState } from '../../components/common/EmptyState';
 import { EventCardSkeleton } from '../../components/common/LoadingState';
 import { subscribeToPublishedEvents } from '../../lib/firestore';
 import { NBKRISTEvent, FilterState } from '../../types';
-import { INITIAL_EVENTS } from '../../utils/initialEvents';
 
 export const SearchPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [firestoreEvents, setFirestoreEvents] = useState<NBKRISTEvent[]>([]);
+  const [events, setEvents] = useState<NBKRISTEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [filters, setFilters] = useState<FilterState>({
@@ -34,7 +33,7 @@ export const SearchPage: React.FC = () => {
   useEffect(() => {
     const unsubscribe = subscribeToPublishedEvents(
       (data) => {
-        setFirestoreEvents(data);
+        setEvents(data);
         setLoading(false);
       },
       () => setLoading(false)
@@ -43,14 +42,8 @@ export const SearchPage: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  const allEvents = useMemo(() => {
-    const liveIds = new Set(firestoreEvents.map(e => e.eventId));
-    const nonDuplicated = INITIAL_EVENTS.filter(e => !liveIds.has(e.eventId));
-    return [...firestoreEvents, ...nonDuplicated];
-  }, [firestoreEvents]);
-
   const filteredEvents = useMemo(() => {
-    return allEvents.filter(event => {
+    return events.filter(event => {
       if (filters.searchQuery.trim()) {
         const query = filters.searchQuery.toLowerCase();
         const matchTitle = event.title.toLowerCase().includes(query);
@@ -86,7 +79,7 @@ export const SearchPage: React.FC = () => {
 
       return true;
     });
-  }, [allEvents, filters]);
+  }, [events, filters]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,7 +153,7 @@ export const SearchPage: React.FC = () => {
             <EventCardSkeleton />
             <EventCardSkeleton />
           </div>
-        ) : allEvents.length === 0 ? (
+        ) : events.length === 0 ? (
           <EmptyState
             title="No upcoming events yet."
             description="The events collection is currently empty."

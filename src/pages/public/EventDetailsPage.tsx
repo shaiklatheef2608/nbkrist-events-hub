@@ -23,7 +23,7 @@ import { StatusBadge } from '../../components/common/StatusBadge';
 import { RegisterButton } from '../../components/common/RegisterButton';
 import { PageLoadingState } from '../../components/common/LoadingState';
 import { HOST_METADATA } from '../../utils/constants';
-import { INITIAL_EVENTS } from '../../utils/initialEvents';
+import { addRecentlyViewedEvent } from '../../utils/recentlyViewed';
 
 export const EventDetailsPage: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
@@ -46,23 +46,13 @@ export const EventDetailsPage: React.FC = () => {
         const data = await getEventById(eventId);
         if (data) {
           setEvent(data);
+          addRecentlyViewedEvent(data);
         } else {
-          // Check initial curated events as fallback
-          const fallback = INITIAL_EVENTS.find(e => e.eventId === eventId);
-          if (fallback) {
-            setEvent(fallback);
-          } else {
-            setError('Event not found. This event may have been removed or the link is invalid.');
-          }
+          setError('Event not found. This event may have been removed or the link is invalid.');
         }
       } catch (err: any) {
         console.error("Notice loading event:", err);
-        const fallback = INITIAL_EVENTS.find(e => e.eventId === eventId);
-        if (fallback) {
-          setEvent(fallback);
-        } else {
-          setError('Unable to load event details. Please try again.');
-        }
+        setError('Unable to load event details. Please try again.');
       } finally {
         setLoading(false);
       }

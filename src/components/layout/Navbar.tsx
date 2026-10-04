@@ -34,8 +34,7 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'All Events', path: '/events' },
-    { name: 'Upcoming Events', path: '/events?filter=upcoming' },
-    { name: 'My Registrations', path: '/my-registrations' }
+    { name: 'Viewed Events', path: '/viewed-events' }
   ];
 
   const isActive = (path: string) => {
@@ -89,15 +88,6 @@ export const Navbar: React.FC = () => {
 
           {/* Right Action Icons & Host Portal */}
           <div className="hidden md:flex items-center gap-3 ml-4">
-            <button 
-              type="button"
-              title="Notifications"
-              className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors relative"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="w-2 h-2 rounded-full bg-blue-600 absolute top-1.5 right-1.5"></span>
-            </button>
-
             {user && hostProfile ? (
               <div className="flex items-center gap-2">
                 <Link

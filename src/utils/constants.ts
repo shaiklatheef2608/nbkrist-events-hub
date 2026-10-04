@@ -1,8 +1,10 @@
 export const APPROVED_HOSTS: Record<string, string> = {
   "abdullatheefshaik4o@gmail.com": "CSE NBKRIST",
-  "uhvcellnbkrist@nbkrist.org": "UHV CELL NBKRST",
-  "ieeenbkrist@nbkrist.org": "IEEE NBKRIST",
+  "ist@nbkrist.org": "NBKRIST Main Institute",
+  "istenbkrist@nbkrist.org": "ISTE SB NBKRST",
   "istesbnbkrist@nbkrist.org": "ISTE SB NBKRST",
+  "uhvcellnbkrist@nbkrist.org": "UHV CELL NBKRST",
+  "ieeesbnbkrist@nbkrist.org": "IEEE NBKRIST",
   "iicnbkrist@nbkrist.org": "IIC NBKRIST",
   "csenbkrist@nbkrist.org": "CSE NBKRIST",
   "mechnbkrist@nbkrist.org": "MECH NBKRIST",
@@ -13,6 +15,7 @@ export const APPROVED_HOSTS: Record<string, string> = {
 };
 
 export const APPROVED_ORGANIZATIONS = [
+  "NBKRIST Main Institute",
   "UHV CELL NBKRST",
   "IEEE NBKRIST",
   "ISTE SB NBKRST",
@@ -48,6 +51,7 @@ export const EVENT_TYPES = [
 ] as const;
 
 export const HOST_METADATA: Record<string, { type: string; department: string; code: string }> = {
+  "NBKRIST Main Institute": { type: "Central Administration", department: "Interdisciplinary & Central Chapters", code: "NBKR-INST" },
   "CSE NBKRIST": { type: "Department", department: "Computer Science & Engineering", code: "NBKR-CSE" },
   "AIDS NBKRIST": { type: "Department", department: "Artificial Intelligence & Data Science", code: "NBKR-AIDS" },
   "ECE NBKRIST": { type: "Department", department: "Electronics & Communication Engineering", code: "NBKR-ECE" },

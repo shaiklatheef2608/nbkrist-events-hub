@@ -42,12 +42,12 @@ export const Hero: React.FC<HeroProps> = ({ onSearch, onQuickFilter }) => {
       {/* Subtle Neural Network Graphics */}
       <NeuralBackground intensity="medium" />
 
-      <div className="relative z-10 max-w-4xl mx-auto text-left sm:text-center space-y-6">
+      <div className="relative z-10 max-w-6xl mx-auto text-left sm:text-center space-y-6">
         
         {/* Main Heading */}
         <div className="space-y-3">
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-            Welcome to NBKRIST
+          <h1 className="text-2xl sm:text-4xl lg:text-[44px] xl:text-5xl font-black tracking-tight text-white leading-tight">
+            Welcome to <span className="inline-block sm:inline whitespace-nowrap">NBKRIST EVENTS HUB</span>
           </h1>
           <p className="max-w-2xl sm:mx-auto text-slate-300 text-sm sm:text-base lg:text-lg font-normal leading-relaxed">
             Find workshops, technical events, student activities, competitions, chapter events and department activities at NBKRIST.
