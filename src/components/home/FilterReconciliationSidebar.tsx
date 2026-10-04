@@ -30,7 +30,7 @@ export const FilterReconciliationSidebar: React.FC<FilterReconciliationSidebarPr
         </h4>
 
         <p className="text-[11px] text-slate-500 leading-relaxed">
-          Firestore collection <code className="text-slate-700 font-mono">'events'</code> is synchronized with the Autonomous Central Registry.
+          Event listings are synchronized with the Autonomous Central Registry.
         </p>
       </div>
 

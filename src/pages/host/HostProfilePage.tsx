@@ -54,7 +54,7 @@ export const HostProfilePage: React.FC = () => {
                 Organization: {orgName}
               </p>
               <span className="text-[10px] font-mono text-emerald-600 block">
-                ✓ Whitelist Enforced in Firestore Rules
+                ✓ Institutional Whitelist Verified
               </span>
             </div>
 
@@ -87,7 +87,7 @@ export const HostProfilePage: React.FC = () => {
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
               <span className="text-[10px] font-mono uppercase text-slate-500 flex items-center gap-1.5">
                 <Key className="w-3.5 h-3.5 text-blue-700" />
-                <span>Firebase Authentication UID</span>
+                <span>Host Account ID</span>
               </span>
               <p className="text-xs font-mono text-slate-700 truncate">
                 {user?.uid}
@@ -103,10 +103,10 @@ export const HostProfilePage: React.FC = () => {
           <div className="p-4 bg-amber-50 border border-amber-200/80 rounded-lg text-xs text-amber-900 space-y-1">
             <div className="flex items-center gap-1.5 font-bold">
               <Lock className="w-4 h-4 text-amber-700" />
-              <span>Identity Tampering Protection</span>
+              <span>Identity Protection</span>
             </div>
             <p className="leading-relaxed">
-              In accordance with security requirements, the organization assignment is strictly read-only and immutably tied to the official email whitelist in Firestore. Modifying the host organization is forbidden at both client and database levels.
+              In accordance with institutional guidelines, the organization assignment is strictly read-only and immutably tied to the official email whitelist. Modifying the host organization is restricted.
             </p>
           </div>
 

@@ -28,7 +28,7 @@ export function subscribeToPublishedEvents(
 ) {
   const q = query(
     collection(db, EVENTS_COLLECTION),
-    where('status', 'in', ['published', 'registration_open', 'registration_closed', 'completed'])
+    where('status', 'in', ['published', 'registration_open', 'registration_closed', 'completed', 'cancelled'])
   );
 
   return onSnapshot(
@@ -38,7 +38,7 @@ export function subscribeToPublishedEvents(
       snapshot.forEach((docSnap) => {
         const data = docSnap.data() as NBKRISTEvent;
         // Publicly visible statuses
-        if (['published', 'registration_open', 'registration_closed', 'completed'].includes(data.status)) {
+        if (['published', 'registration_open', 'registration_closed', 'completed', 'cancelled'].includes(data.status)) {
           events.push({
             ...data,
             eventId: docSnap.id

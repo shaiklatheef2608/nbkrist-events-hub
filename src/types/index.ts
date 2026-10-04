@@ -11,6 +11,8 @@ export interface NBKRISTEvent {
   department: string;   // e.g. "Computer Science & Engineering", "Interdisciplinary"
   eventType: string;    // e.g. "Symposium", "Workshop", "Hackathon", "Guest Lecture"
   date: string;         // YYYY-MM-DD
+  endDate?: string;      // YYYY-MM-DD
+  featured?: boolean;   // featured event flag
   startTime: string;    // e.g. "09:30 AM"
   endTime?: string;     // e.g. "04:30 PM"
   venue: string;        // e.g. "Auditorium Block A, NBKRIST"

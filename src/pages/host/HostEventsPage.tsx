@@ -253,7 +253,7 @@ export const HostEventsPage: React.FC = () => {
       <ConfirmDialog
         isOpen={deleteTarget !== null}
         title="Permanently Delete Event?"
-        message={`Are you sure you want to delete "${deleteTarget?.title}"? This will permanently remove the event from Firestore and the public manifest.`}
+        message={`Are you sure you want to delete "${deleteTarget?.title}"? This will permanently remove the event from the public events hub.`}
         confirmText="Yes, Delete Event"
         cancelText="Cancel"
         variant="danger"

@@ -150,7 +150,7 @@ export const HostDashboardPage: React.FC = () => {
           <div>
             <h3 className="font-bold text-slate-900 text-base">Your Recent Events</h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              Live Firestore documents registered under your organization ID
+              Official published events and drafts registered under your department
             </p>
           </div>
 

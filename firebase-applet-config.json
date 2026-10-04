@@ -1,12 +1,12 @@
 {
   "projectId": "nbkrist-events-hub",
-  "appId": "1:402455512554:web:9ff5e64db5786bb5b8de93",
+  "appId": "1:402455512554:web:71b9c9f3c7a7815bb8de93",
   "apiKey": "AIzaSyCtZro2n-g9yO7GXNVHWIAFVtd5NotD-3c",
   "authDomain": "nbkrist-events-hub.firebaseapp.com",
-  "firestoreDatabaseId": "(default)",
+  "firestoreDatabaseId": "ai-studio-nbkristeventshub-ee4fe18b-8c33-493e-91c5-df6a3a99b461",
   "storageBucket": "nbkrist-events-hub.firebasestorage.app",
   "messagingSenderId": "402455512554",
   "measurementId": "",
-  "oAuthClientId": "",
+  "oAuthClientId": "402455512554-cm7doah29a1ivtd3fse5ivb80pj2lm07.apps.googleusercontent.com",
   "recaptchaSiteKey": ""
 }
