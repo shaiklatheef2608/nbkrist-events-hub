@@ -6,11 +6,7 @@ import {
   Menu, 
   X, 
   LayoutDashboard, 
-  LogOut, 
-  Calendar, 
-  BookmarkCheck,
-  User,
-  Bell
+  LogOut
 } from 'lucide-react';
 import { NBKRISTLogo } from '../common/NBKRISTLogo';
 import { useAuth } from '../../context/AuthContext';

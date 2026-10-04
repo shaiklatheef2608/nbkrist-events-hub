@@ -42,6 +42,7 @@ export const PosterUrlInput: React.FC<PosterUrlInputProps> = ({ value, onChange 
           type="url"
           name="posterUrl"
           id="posterUrl"
+          required
           placeholder="https://example.com/images/symposium-poster.jpg"
           value={value}
           onChange={handleInputChange}
@@ -59,9 +60,18 @@ export const PosterUrlInput: React.FC<PosterUrlInputProps> = ({ value, onChange 
         )}
       </div>
 
-      <p className="text-[11px] text-slate-500">
-        Paste a direct, publicly accessible image URL (JPEG, PNG, WEBP). If left blank, the system automatically displays the official NBKRIST technical event card design.
-      </p>
+      <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1.5 text-xs text-slate-600">
+        <p className="font-semibold text-slate-700">Poster Upload Instructions * (Compulsory):</p>
+        <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-500">
+          <li>Use this URL to generate an image URL: <a href="https://uploadimgur.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline font-semibold">https://uploadimgur.com/</a></li>
+          <li>Use this website to generate an image URL.</li>
+          <li>Click on it, upload the image, and get the URL.</li>
+          <li>Paste it down.</li>
+        </ul>
+        <p className="text-[10px] text-amber-600 font-semibold pt-1">
+          ✓ This poster image URL is mandatory to successfully publish or update the event.
+        </p>
+      </div>
 
       {/* URL Validation State & Live Preview */}
       {value.trim() && (

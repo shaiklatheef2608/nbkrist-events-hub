@@ -111,17 +111,20 @@ export const EventForm: React.FC<EventFormProps> = ({
       return;
     }
 
-    if (posterUrl.trim()) {
-      try {
-        const parsed = new URL(posterUrl.trim());
-        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-          setError('Please provide a valid http:// or https:// URL for the poster image.');
-          return;
-        }
-      } catch {
-        setError('Please provide a valid URL for the poster image.');
+    if (!posterUrl.trim()) {
+      setError('Please provide a poster image URL. This field is compulsory.');
+      return;
+    }
+
+    try {
+      const parsed = new URL(posterUrl.trim());
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        setError('Please provide a valid http:// or https:// URL for the poster image.');
         return;
       }
+    } catch {
+      setError('Please provide a valid URL for the poster image.');
+      return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -251,7 +254,9 @@ export const EventForm: React.FC<EventFormProps> = ({
         {/* Poster Image URL */}
         <div>
           <label className="block text-[11px] font-mono uppercase text-slate-600 mb-1" htmlFor="posterUrl">
-            Poster Image URL
+            Poster Image URL * <span className="normal-case text-[10px] font-sans text-blue-600 font-semibold ml-1">
+              (<a href="https://uploadimgur.com/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-800 transition-colors">https://uploadimgur.com/</a>)
+            </span>
           </label>
           <PosterUrlInput
             value={posterUrl}
@@ -365,11 +370,11 @@ export const EventForm: React.FC<EventFormProps> = ({
 
           <div>
             <label className="block text-[11px] font-mono uppercase text-slate-600 mb-1">
-              Registration Deadline
+              Registration Deadline *
             </label>
             <input
-              type="text"
-              placeholder="e.g. March 25, 2025"
+              type="date"
+              required
               value={registrationDeadline}
               onChange={(e) => setRegistrationDeadline(e.target.value)}
               className="w-full text-xs bg-slate-50 border border-slate-200 rounded-md p-2.5 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-blue-600"

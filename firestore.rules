@@ -16,11 +16,11 @@ service cloud.firestore {
     }
 
     function isSuperAdmin() {
-      return isSignedIn() && request.auth.token.email.lower() == 'abdullatheefshaik4o@gmail.com';
+      return isSignedIn() && 'email' in request.auth.token && request.auth.token.email.lower() == 'abdullatheefshaik4o@gmail.com';
     }
 
     function isWhitelistedHostEmail(email) {
-      return email.lower() in [
+      return email != null && email.lower() in [
         'ist@nbkrist.org',
         'istenbkrist@nbkrist.org',
         'istesbnbkrist@nbkrist.org',
@@ -55,10 +55,11 @@ service cloud.firestore {
 
     // Host profiles
     match /hosts/{uid} {
-      allow get: if isSignedIn() && (request.auth.uid == uid || isSuperAdmin() || isWhitelistedHostEmail(request.auth.token.email));
+      allow get: if isSignedIn() && (request.auth.uid == uid || isSuperAdmin() || ('email' in request.auth.token && isWhitelistedHostEmail(request.auth.token.email)));
       allow list: if isSignedIn();
       allow create: if isSignedIn() && 
         request.auth.uid == uid &&
+        'email' in request.auth.token &&
         exists(/databases/$(database)/documents/approvedHosts/$(request.auth.token.email.lower())) &&
         getApprovedHostDoc(request.auth.token.email.lower()).approved == true &&
         request.resource.data.uid == uid &&
@@ -87,24 +88,32 @@ service cloud.firestore {
 
     // Institutional Events: Public can browse published events
     match /events/{eventId} {
-      allow get, list: if true;
+      // Drafts can only be read by their creator or superadmin
+      allow get, list: if resource.data.status != 'draft' || (isSignedIn() && (resource.data.createdBy == request.auth.uid || isSuperAdmin()));
 
       allow create: if isSignedIn() && 
+        'email' in request.auth.token &&
         (isWhitelistedHostEmail(request.auth.token.email) || isSuperAdmin()) &&
         request.resource.data.createdBy == request.auth.uid &&
         request.resource.data.organization is string &&
         request.resource.data.title is string &&
         request.resource.data.title.size() >= 3 &&
-        request.resource.data.title.size() <= 200;
+        request.resource.data.title.size() <= 200 &&
+        request.resource.data.posterUrl is string &&
+        request.resource.data.posterUrl.size() >= 10;
 
       allow update: if isSignedIn() && 
+        'email' in request.auth.token &&
         (resource.data.createdBy == request.auth.uid || isWhitelistedHostEmail(request.auth.token.email) || isSuperAdmin()) &&
         request.resource.data.createdBy == resource.data.createdBy &&
         request.resource.data.title is string &&
         request.resource.data.title.size() >= 3 &&
-        request.resource.data.title.size() <= 200;
+        request.resource.data.title.size() <= 200 &&
+        request.resource.data.posterUrl is string &&
+        request.resource.data.posterUrl.size() >= 10;
 
       allow delete: if isSignedIn() && 
+        'email' in request.auth.token &&
         (resource.data.createdBy == request.auth.uid || isWhitelistedHostEmail(request.auth.token.email) || isSuperAdmin());
     }
   }
