@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default Deny Catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isWhitelistedHostEmail(email) {
+      return email.lower() in [
+        'uhvcellnbkrist@nbkrist.org',
+        'ieeenbkrist@nbkrist.org',
+        'istesbnbkrist@nbkrist.org',
+        'iicnbkrist@nbkrist.org',
+        'csenbkrist@nbkrist.org',
+        'mechnbkrist@nbkrist.org',
+        'eeenbkrist@nbkrist.org',
+        'ecenbkrist@nbkrist.org',
+        'aidsnbkrist@nbkrist.org',
+        'civilnbkrist@nbkrist.org'
+      ];
+    }
+
+    function getExpectedOrg(email) {
+      let lower = email.lower();
+      return lower == 'uhvcellnbkrist@nbkrist.org' ? 'UHV CELL NBKRST' :
+             lower == 'ieeenbkrist@nbkrist.org' ? 'IEEE NBKRIST' :
+             lower == 'istesbnbkrist@nbkrist.org' ? 'ISTE SB NBKRST' :
+             lower == 'iicnbkrist@nbkrist.org' ? 'IIC NBKRIST' :
+             lower == 'csenbkrist@nbkrist.org' ? 'CSE NBKRIST' :
+             lower == 'mechnbkrist@nbkrist.org' ? 'MECH NBKRIST' :
+             lower == 'eeenbkrist@nbkrist.org' ? 'EEE NBKRIST' :
+             lower == 'ecenbkrist@nbkrist.org' ? 'ECE NBKRIST' :
+             lower == 'aidsnbkrist@nbkrist.org' ? 'AIDS NBKRIST' :
+             lower == 'civilnbkrist@nbkrist.org' ? 'CIVIL NBKRIST' : '';
+    }
+
+    function getHostDoc() {
+      return get(/databases/$(database)/documents/hosts/$(request.auth.uid)).data;
+    }
+
+    function isHostApproved() {
+      return isSignedIn() && 
+        exists(/databases/$(database)/documents/hosts/$(request.auth.uid)) &&
+        isWhitelistedHostEmail(request.auth.token.email);
+    }
+
+    // Health check endpoint
+    match /test/connection {
+      allow read: if true;
+    }
+
+    // Whitelist registry: publicly readable, writable for whitelisted emails
+    match /approvedHosts/{email} {
+      allow get, list: if true;
+      allow write: if isWhitelistedHostEmail(email);
+    }
+
+    // Host profiles: each host can read and manage their own document
+    match /hosts/{uid} {
+      allow get: if isOwner(uid);
+      allow list: if isSignedIn();
+      // Allow host to register/create profile if their email is in the whitelist and matches their token
+      allow create, update: if isOwner(uid) && 
+        request.resource.data.uid == uid &&
+        isWhitelistedHostEmail(request.auth.token.email) &&
+        request.resource.data.email.lower() == request.auth.token.email.lower() &&
+        request.resource.data.organization == getExpectedOrg(request.auth.token.email);
+      allow delete: if false;
+    }
+
+    // General user profiles
+    match /users/{uid} {
+      allow get, update, delete: if isOwner(uid);
+      allow create: if isOwner(uid) && request.resource.data.uid == uid;
+      allow list: if false;
+    }
+
+    // Institutional Events: All institutional events are readable by public/students
+    match /events/{eventId} {
+      allow get, list: if true;
+
+      // Host can create event only for their authenticated organization
+      allow create: if isHostApproved() && 
+        request.resource.data.createdBy == request.auth.uid &&
+        request.resource.data.organization == getHostDoc().organization &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() >= 3 &&
+        request.resource.data.title.size() <= 200 &&
+        request.resource.data.status in ['draft', 'published', 'registration_open', 'registration_closed', 'completed'];
+
+      // Host can update only events created by them, cannot change createdBy or organization
+      allow update: if isHostApproved() && 
+        resource.data.createdBy == request.auth.uid &&
+        request.resource.data.createdBy == resource.data.createdBy &&
+        request.resource.data.organization == resource.data.organization &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() >= 3 &&
+        request.resource.data.title.size() <= 200;
+
+      // Host can delete only their own events
+      allow delete: if isHostApproved() && resource.data.createdBy == request.auth.uid;
+    }
+  }
+}

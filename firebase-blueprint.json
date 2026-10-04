@@ -1,0 +1,239 @@
+{
+  "entities": {
+    "ApprovedHost": {
+      "title": "ApprovedHost",
+      "description": "Whitelisted institutional host entity allowed to register as organizer",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Official NBKRIST host email address",
+          "maxLength": 100
+        },
+        "organization": {
+          "type": "string",
+          "description": "Official organization or department name",
+          "maxLength": 100
+        },
+        "approved": {
+          "type": "boolean",
+          "description": "Whether this host email is actively approved"
+        },
+        "hostType": {
+          "type": "string",
+          "description": "Category such as department, student_chapter, or central_cell",
+          "maxLength": 50
+        }
+      },
+      "required": ["email", "organization", "approved"]
+    },
+    "Host": {
+      "title": "Host",
+      "description": "Registered host profile tied to Firebase Auth UID",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth user ID",
+          "maxLength": 128
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Host email address",
+          "maxLength": 100
+        },
+        "organization": {
+          "type": "string",
+          "description": "Assigned organization name matching whitelist",
+          "maxLength": 100
+        },
+        "approved": {
+          "type": "boolean",
+          "description": "Authorization state"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Host account creation ISO timestamp or server timestamp"
+        }
+      },
+      "required": ["uid", "email", "organization", "approved"]
+    },
+    "User": {
+      "title": "User",
+      "description": "General authenticated user profile",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth user ID",
+          "maxLength": 128
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User email address",
+          "maxLength": 100
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        }
+      },
+      "required": ["uid", "email"]
+    },
+    "Event": {
+      "title": "Event",
+      "description": "Institutional event record authored by an approved host organization",
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "description": "Unique event identifier",
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the event",
+          "minLength": 3,
+          "maxLength": 200
+        },
+        "posterUrl": {
+          "type": "string",
+          "description": "URL to event poster in Firebase Storage or external asset",
+          "maxLength": 1000
+        },
+        "description": {
+          "type": "string",
+          "description": "Comprehensive event description and details",
+          "maxLength": 10000
+        },
+        "organization": {
+          "type": "string",
+          "description": "Host organization name",
+          "maxLength": 100
+        },
+        "department": {
+          "type": "string",
+          "description": "Primary department associated with event",
+          "maxLength": 100
+        },
+        "eventType": {
+          "type": "string",
+          "description": "Category of event (Symposium, Workshop, Hackathon, etc.)",
+          "maxLength": 80
+        },
+        "date": {
+          "type": "string",
+          "description": "Event date formatted as YYYY-MM-DD or readable date",
+          "maxLength": 50
+        },
+        "startTime": {
+          "type": "string",
+          "description": "Event start time (e.g. 09:30 AM)",
+          "maxLength": 30
+        },
+        "endTime": {
+          "type": "string",
+          "description": "Event end time (e.g. 04:30 PM)",
+          "maxLength": 30
+        },
+        "venue": {
+          "type": "string",
+          "description": "Auditorium, lab, or campus venue location",
+          "maxLength": 200
+        },
+        "registrationFee": {
+          "type": "string",
+          "description": "Free or fee details with currency",
+          "maxLength": 100
+        },
+        "registrationDeadline": {
+          "type": "string",
+          "description": "Deadline for registration",
+          "maxLength": 50
+        },
+        "registrationMethod": {
+          "type": "string",
+          "enum": ["externalWebsite", "googleForm", "microsoftForm", "email"],
+          "description": "Method of student registration"
+        },
+        "registrationUrl": {
+          "type": "string",
+          "description": "External URL or Google/Microsoft form destination",
+          "maxLength": 1000
+        },
+        "registrationEmail": {
+          "type": "string",
+          "format": "email",
+          "description": "Contact email destination for mailto registration",
+          "maxLength": 100
+        },
+        "coordinatorName": {
+          "type": "string",
+          "description": "Student or faculty coordinator name",
+          "maxLength": 100
+        },
+        "coordinatorEmail": {
+          "type": "string",
+          "format": "email",
+          "description": "Coordinator email contact",
+          "maxLength": 100
+        },
+        "coordinatorPhone": {
+          "type": "string",
+          "description": "Coordinator contact phone number",
+          "maxLength": 50
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "published", "registration_open", "registration_closed", "completed"],
+          "description": "Current lifecycle status of event"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Firebase Auth UID of the host author",
+          "maxLength": 128
+        },
+        "organizationId": {
+          "type": "string",
+          "description": "Normalized identifier or organization key of the host",
+          "maxLength": 100
+        }
+      },
+      "required": [
+        "eventId",
+        "title",
+        "organization",
+        "department",
+        "eventType",
+        "date",
+        "venue",
+        "registrationMethod",
+        "status",
+        "createdBy"
+      ]
+    }
+  },
+  "firestore": {
+    "/approvedHosts/{email}": {
+      "schema": "ApprovedHost",
+      "description": "Central whitelist of verified NBKRIST host email accounts"
+    },
+    "/hosts/{uid}": {
+      "schema": "Host",
+      "description": "Host profiles containing assigned organization linked to UID"
+    },
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "Registered user metadata records"
+    },
+    "/events/{eventId}": {
+      "schema": "Event",
+      "description": "All public and draft institutional event documents"
+    }
+  }
+}

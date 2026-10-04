@@ -1,0 +1,6 @@
+{
+  "name": "NBKRIST Events Hub",
+  "description": "Discover workshops, technical events, student activities, competitions, chapter events and department activities at NBKRIST Institute of Science and Technology.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
