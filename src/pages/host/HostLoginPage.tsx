@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { KeyRound, ShieldCheck, AlertCircle, ArrowRight, Lock, CheckCircle2 } from 'lucide-react';
+import { KeyRound, ShieldCheck, AlertCircle, ArrowRight, Lock, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { NBKRISTLogo } from '../../components/common/NBKRISTLogo';
 import { NeuralBackground } from '../../components/common/NeuralBackground';
 import { useAuth } from '../../context/AuthContext';
 import { APPROVED_HOSTS } from '../../utils/constants';
 
 export const HostLoginPage: React.FC = () => {
-  const [email, setEmail] = useState('ist@nbkrist.org');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { login, loginWithGoogle } = useAuth();
@@ -126,14 +127,23 @@ export const HostLoginPage: React.FC = () => {
                   Forgot Password?
                 </Link>
               </div>
-              <input
-                type="password"
-                required
-                placeholder="••••••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-md py-2.5 px-3 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-blue-600"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  placeholder="••••••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full text-xs bg-slate-50 border border-slate-200 rounded-md py-2.5 pl-3 pr-10 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-blue-600"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-hidden cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <button
