@@ -1,4 +1,5 @@
 export const APPROVED_HOSTS: Record<string, string> = {
+  "abdullatheefshaik4o@gmail.com": "CSE NBKRIST",
   "uhvcellnbkrist@nbkrist.org": "UHV CELL NBKRST",
   "ieeenbkrist@nbkrist.org": "IEEE NBKRIST",
   "istesbnbkrist@nbkrist.org": "ISTE SB NBKRST",

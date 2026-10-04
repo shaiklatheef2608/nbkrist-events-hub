@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { EventFilters } from '../../components/events/EventFilters';
 import { EventCard } from '../../components/events/EventCard';
 import { EmptyState } from '../../components/common/EmptyState';
@@ -9,6 +9,7 @@ import { NBKRISTEvent, FilterState } from '../../types';
 import { Calendar, Search, SlidersHorizontal, Sparkles } from 'lucide-react';
 
 export const EventsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [events, setEvents] = useState<NBKRISTEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -146,7 +147,7 @@ export const EventsPage: React.FC = () => {
             description="There are currently no events registered in the NBKRIST Events Hub. Authorized department organizers can publish events via the host portal."
             icon="calendar"
             actionText="Go to Host Portal"
-            onAction={() => window.location.href = '/host/login'}
+            onAction={() => navigate('/host/login')}
             variant="page"
           />
         ) : filteredEvents.length === 0 ? (

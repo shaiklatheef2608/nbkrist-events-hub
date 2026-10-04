@@ -17,6 +17,7 @@ service cloud.firestore {
 
     function isWhitelistedHostEmail(email) {
       return email.lower() in [
+        'abdullatheefshaik4o@gmail.com',
         'uhvcellnbkrist@nbkrist.org',
         'ieeenbkrist@nbkrist.org',
         'istesbnbkrist@nbkrist.org',
@@ -32,7 +33,8 @@ service cloud.firestore {
 
     function getExpectedOrg(email) {
       let lower = email.lower();
-      return lower == 'uhvcellnbkrist@nbkrist.org' ? 'UHV CELL NBKRST' :
+      return lower == 'abdullatheefshaik4o@gmail.com' ? 'CSE NBKRIST' :
+             lower == 'uhvcellnbkrist@nbkrist.org' ? 'UHV CELL NBKRST' :
              lower == 'ieeenbkrist@nbkrist.org' ? 'IEEE NBKRIST' :
              lower == 'istesbnbkrist@nbkrist.org' ? 'ISTE SB NBKRST' :
              lower == 'iicnbkrist@nbkrist.org' ? 'IIC NBKRIST' :

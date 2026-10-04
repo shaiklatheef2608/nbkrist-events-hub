@@ -3,6 +3,8 @@ import {
   User, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut, 
   sendPasswordResetEmail, 
   onAuthStateChanged 
@@ -18,6 +20,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; organization?: string; error?: string }>;
   register: (email: string, password: string) => Promise<{ success: boolean; organization?: string; error?: string }>;
+  loginWithGoogle: () => Promise<{ success: boolean; organization?: string; error?: string }>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
 }
@@ -168,16 +171,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setHostProfile(profile);
       return { success: true, organization: profile.organization };
     } catch (err: any) {
-      console.error("Host login error:", err);
-      let message = "Invalid email or password. Please verify your credentials.";
+      console.warn("Host login error:", err?.code || err?.message || err);
+      let message = err?.message || "Invalid email or password. Please verify your credentials.";
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         message = "Incorrect password or email combination. Verify credentials and try again.";
       } else if (err.code === 'auth/too-many-requests') {
         message = "Access temporarily disabled due to multiple failed login attempts. Please reset your password or try again later.";
       } else if (err.message && err.message.includes('permission-denied')) {
         message = "Firestore permission error: Access denied to host records. Check database rules.";
-      } else if (err.message) {
-        message = err.message;
       }
       return { success: false, error: message };
     }
@@ -195,7 +196,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
       }
 
-      // Step 2: Create user with Firebase Auth
+      // Step 2: Create user directly with Firebase Auth
       const cred = await createUserWithEmailAndPassword(auth, normalizedEmail, password);
 
       // Step 3: Read approved host doc and create hosts/{uid}
@@ -210,8 +211,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setHostProfile(profile);
       return { success: true, organization: profile.organization };
     } catch (err: any) {
-      console.error("Host registration error:", err);
-      let message = "Host registration failed. Please verify your details.";
+      console.warn("Host registration error:", err?.code || err?.message || err);
+      let message = err?.message || "Host registration failed. Please verify your details.";
       if (err.code === 'auth/email-already-in-use') {
         message = "An account already exists for this approved host email. Please sign in instead.";
       } else if (err.code === 'auth/weak-password') {
@@ -220,6 +221,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         message = "Invalid email format. Please check the address entered.";
       } else if (err.message && err.message.includes('permission-denied')) {
         message = "Firestore permission error: Access denied to create host record.";
+      }
+      return { success: false, error: message };
+    }
+  };
+
+  const loginWithGoogle = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const cred = await signInWithPopup(auth, provider);
+      const email = cred.user.email?.toLowerCase().trim() || '';
+
+      if (!APPROVED_HOSTS[email]) {
+        await signOut(auth);
+        return {
+          success: false,
+          error: `Google Account (${email}) is not authorized as an NBKRIST host organizer. Please sign in with an authorized departmental address or administrator account.`
+        };
+      }
+
+      const profile = await verifyAndCreateHostProfile(cred.user);
+      if (!profile) {
+        return {
+          success: false,
+          error: "Failed to initialize host profile in Firestore."
+        };
+      }
+
+      setHostProfile(profile);
+      return { success: true, organization: profile.organization };
+    } catch (err: any) {
+      if (err.code === 'auth/unauthorized-domain' || err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+        console.warn("Notice: Google sign-in status:", err.code);
+      } else {
+        console.warn("Notice: Google sign-in issue:", err);
+      }
+      let message = "Google Sign-In failed.";
+      if (err.code === 'auth/unauthorized-domain') {
+        const domain = typeof window !== 'undefined' ? window.location.hostname : 'current domain';
+        message = `Firebase error (auth/unauthorized-domain): This domain (${domain}) is not authorized in Firebase Console > Authentication > Settings > Authorized domains.`;
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        message = "Sign-in popup was closed before completing.";
+      } else if (err.code === 'auth/cancelled-popup-request') {
+        message = "Sign-in request was cancelled.";
+      } else if (err.code === 'auth/popup-blocked') {
+        message = "Sign-in popup was blocked by your browser. Please allow popups for this site.";
       } else if (err.message) {
         message = err.message;
       }
@@ -257,7 +303,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, hostProfile, loading, login, register, logout, resetPassword }}>
+    <AuthContext.Provider value={{ user, hostProfile, loading, login, register, loginWithGoogle, logout, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );

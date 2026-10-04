@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Hero } from '../../components/home/Hero';
 import { EventFilters } from '../../components/events/EventFilters';
 import { EventCard } from '../../components/events/EventCard';
@@ -22,6 +22,7 @@ const initialFilters: FilterState = {
 };
 
 export const HomePage: React.FC = () => {
+  const navigate = useNavigate();
   const [events, setEvents] = useState<NBKRISTEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<FilterState>(initialFilters);
@@ -171,7 +172,7 @@ export const HomePage: React.FC = () => {
                   description="NBKRIST host departments and student chapters have not published any upcoming events to the live manifest yet."
                   icon="calendar"
                   actionText="Sign In as Host to Publish Event"
-                  onAction={() => window.location.href = '/host/login'}
+                  onAction={() => navigate('/host/login')}
                 />
               ) : filteredEvents.length === 0 ? (
                 /* Exactly matches mandated string from Section 23 */

@@ -34,7 +34,7 @@ export const NBKRISTLogo: React.FC<NBKRISTLogoProps> = ({
           className="w-full h-full object-contain"
           onError={(e) => {
             // Fallback to static public logo
-            e.currentTarget.src = "/logo/nbkrist-logo.png";
+            e.currentTarget.src = "/logo/nbkrist-logo.svg";
           }}
         />
       </div>
