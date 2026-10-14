@@ -10,19 +10,24 @@ const firebaseConfig = {
   projectId: appletConfig.projectId || "nbkrist-events-hub",
   storageBucket: appletConfig.storageBucket || "nbkrist-events-hub.firebasestorage.app",
   messagingSenderId: appletConfig.messagingSenderId || "402455512554",
-  appId: appletConfig.appId || "1:402455512554:web:9ff5e64db5786bb5b8de93",
-  firestoreDatabaseId: '(default)'
+  appId: appletConfig.appId || "1:402455512554:web:9ff5e64db5786bb5b8de93"
 };
 
 // Ensure exactly one Firebase app instance
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Firestore using (default) database with auto-detect long polling for cloud container stability
+const dbId = appletConfig.firestoreDatabaseId && appletConfig.firestoreDatabaseId !== '(default)'
+  ? appletConfig.firestoreDatabaseId
+  : undefined;
+
+// Firestore database with auto-detect long polling for cloud container stability
 export const db = (() => {
   try {
-    return initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
+    return dbId 
+      ? initializeFirestore(app, { experimentalAutoDetectLongPolling: true }, dbId)
+      : initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
   } catch {
-    return getFirestore(app);
+    return dbId ? getFirestore(app, dbId) : getFirestore(app);
   }
 })();
 

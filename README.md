@@ -12,7 +12,7 @@ This portal serves as the unified digital hub where institutional departments an
 * **Verified Whitelisted Registration**: Organizers can register and activate accounts using pre-approved `@nbkrist.org` institutional emails.
 * **Automatic Organization Routing**: Realtime lookup maps registered emails (e.g. `csenbkrist@nbkrist.org`) to their authorized title (e.g. `CSE Department`) on signup.
 * **Full Event Lifecycle Management**: Write, edit, save drafts, publish, and toggle registration states (open, closed, completed, cancelled).
-* **Compulsory Poster Image Integration**: Every event must feature a high-fidelity poster URL linked through a clickable helper to [uploadimgur.com](https://uploadimgur.com/).
+* **Compulsory Poster Image Integration**: Every event must feature a high-fidelity poster URL linked through a clickable helper to [imgto.link](https://imgto.link/free-image-hosting).
 
 ### 🧭 Student & Public Interface
 * **Advanced Multi-Criteria Search**: Instantly filter collegiate activities by text keywords, specific department hosts, classification type, and dates.

@@ -255,7 +255,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         <div>
           <label className="block text-[11px] font-mono uppercase text-slate-600 mb-1" htmlFor="posterUrl">
             Poster Image URL * <span className="normal-case text-[10px] font-sans text-blue-600 font-semibold ml-1">
-              (<a href="https://uploadimgur.com/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-800 transition-colors">https://uploadimgur.com/</a>)
+              (<a href="https://postimages.org" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-800 transition-colors">Free Upload on postimages.org</a>)
             </span>
           </label>
           <PosterUrlInput

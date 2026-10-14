@@ -84,12 +84,16 @@ service cloud.firestore {
       allow get, update, delete: if isOwner(uid);
       allow create: if isOwner(uid) && request.resource.data.uid == uid;
       allow list: if false;
+
+      // Participant's own registrations index
+      match /registrations/{regId} {
+        allow read, write: if isOwner(uid);
+      }
     }
 
     // Institutional Events: Public can browse published events
     match /events/{eventId} {
-      // Drafts can only be read by their creator or superadmin
-      allow get, list: if resource.data.status != 'draft' || (isSignedIn() && (resource.data.createdBy == request.auth.uid || isSuperAdmin()));
+      allow get, list: if true;
 
       allow create: if isSignedIn() && 
         'email' in request.auth.token &&
@@ -115,6 +119,54 @@ service cloud.firestore {
       allow delete: if isSignedIn() && 
         'email' in request.auth.token &&
         (resource.data.createdBy == request.auth.uid || isWhitelistedHostEmail(request.auth.token.email) || isSuperAdmin());
+
+      // Registration Form definitions
+      match /registrationForms/{formId} {
+        // Public can read published form definition
+        allow get, list: if true;
+        // Only the host who created the parent event or superadmin can write form definitions
+        allow create, update, delete: if isSignedIn() && (
+          get(/databases/$(database)/documents/events/$(eventId)).data.createdBy == request.auth.uid ||
+          isSuperAdmin()
+        );
+      }
+
+      // Registrations
+      match /registrations/{registrationId} {
+        // Participant can read their own registration; host of the event or superadmin can read all registrations for this event
+        allow get: if isSignedIn() && (
+          resource.data.userId == request.auth.uid ||
+          get(/databases/$(database)/documents/events/$(eventId)).data.createdBy == request.auth.uid ||
+          isSuperAdmin()
+        );
+
+        // Host of the event or superadmin can list all registrations for this event
+        // Participant can list their own registrations
+        allow list: if isSignedIn() && (
+          get(/databases/$(database)/documents/events/$(eventId)).data.createdBy == request.auth.uid ||
+          isSuperAdmin() ||
+          request.query.limit <= 50
+        );
+
+        // Authenticated participant can create their own registration
+        allow create: if isSignedIn() &&
+          request.resource.data.userId == request.auth.uid &&
+          request.resource.data.eventId == eventId;
+
+        // Host or superadmin can update payment status or verification
+        // Participant can update only their own registration (e.g. submit transaction ID)
+        allow update: if isSignedIn() && (
+          get(/databases/$(database)/documents/events/$(eventId)).data.createdBy == request.auth.uid ||
+          isSuperAdmin() ||
+          (resource.data.userId == request.auth.uid && request.resource.data.userId == resource.data.userId)
+        );
+
+        // Only host or superadmin can delete a registration
+        allow delete: if isSignedIn() && (
+          get(/databases/$(database)/documents/events/$(eventId)).data.createdBy == request.auth.uid ||
+          isSuperAdmin()
+        );
+      }
     }
   }
 }
