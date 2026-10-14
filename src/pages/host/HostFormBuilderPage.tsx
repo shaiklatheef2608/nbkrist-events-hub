@@ -716,7 +716,7 @@ export const HostFormBuilderPage: React.FC = () => {
                   </label>
                   <input
                     type="url"
-                    placeholder="https://i.postimg.cc/... or https://drive.google.com/file/d/..."
+                    placeholder="https://imgto.link/... or https://drive.google.com/file/d/..."
                     value={form.paymentSettings.qrImageUrl || ''}
                     onChange={(e) => {
                       const qrImageUrl = e.target.value;
@@ -728,7 +728,7 @@ export const HostFormBuilderPage: React.FC = () => {
                     className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-md font-mono text-slate-900"
                   />
                   <p className="text-[11px] text-slate-500 mt-1">
-                    Upload your QR image on <a href="https://postimages.org" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-medium">postimages.org</a> or paste a public Google Drive sharing URL.
+                    Upload your QR image on <a href="https://imgto.link/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-medium">https://imgto.link/</a> or paste a public Google Drive sharing URL.
                   </p>
 
                   {/* QR Preview in Builder */}
@@ -1023,7 +1023,7 @@ export const HostFormBuilderPage: React.FC = () => {
                     <label className="block text-[11px] font-mono text-slate-600 uppercase">Image / Banner URL (Supports direct web URLs or Google Drive sharing link)</label>
                     <input
                       type="url"
-                      placeholder="https://i.postimg.cc/... or public Google Drive link"
+                      placeholder="https://imgto.link/... or public Google Drive link"
                       value={question.imageUrl || ''}
                       onChange={(e) => handleUpdateQuestion(question.id, { imageUrl: e.target.value })}
                       className="w-full text-xs bg-white border border-slate-200 rounded p-2 text-slate-800"

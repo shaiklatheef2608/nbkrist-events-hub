@@ -337,7 +337,7 @@ export const DynamicFieldRenderer: React.FC<DynamicFieldRendererProps> = ({
             <input
               type="url"
               disabled={readOnly}
-              placeholder="https://i.postimg.cc/... or Google Drive URL"
+              placeholder="https://imgto.link/... or Google Drive URL"
               value={value ?? ''}
               onChange={(e) => onChange(e.target.value)}
               className={`w-full text-xs sm:text-sm font-mono bg-white border ${error ? 'border-red-400 ring-1 ring-red-300' : 'border-slate-300'} rounded-lg p-2.5 sm:p-3 text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-600 transition-all`}

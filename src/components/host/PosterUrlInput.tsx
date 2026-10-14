@@ -44,7 +44,7 @@ export const PosterUrlInput: React.FC<PosterUrlInputProps> = ({ value, onChange 
           name="posterUrl"
           id="posterUrl"
           required
-          placeholder="https://i.postimg.cc/... or public Google Drive link"
+          placeholder="https://imgto.link/... or public Google Drive link"
           value={value}
           onChange={handleInputChange}
           className="w-full pl-9 pr-9 py-2.5 text-xs sm:text-sm font-mono bg-slate-50 border border-slate-200 rounded-md text-slate-900 focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-blue-600 transition-all placeholder:font-sans placeholder:text-slate-400"
@@ -67,30 +67,21 @@ export const PosterUrlInput: React.FC<PosterUrlInputProps> = ({ value, onChange 
           <span className="text-[10px] text-amber-600 font-mono font-medium">Compulsory</span>
         </div>
         <p className="text-[11px] text-slate-500">
-          Upload your poster image to a free image hosting platform or paste a public Google Drive link:
+          Upload your poster image to get a public image URL or paste a public Google Drive link:
         </p>
         <div className="flex flex-wrap items-center gap-2 pt-0.5">
           <a
-            href="https://postimages.org"
+            href="https://imgto.link/"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-slate-300 rounded text-blue-700 hover:text-blue-900 hover:border-blue-400 font-medium transition-colors text-[11px] shadow-2xs"
           >
-            <span>Postimages.org (Direct link, no signup)</span>
-            <ExternalLink className="w-3 h-3" />
-          </a>
-          <a
-            href="https://imgbb.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-slate-300 rounded text-slate-700 hover:text-slate-900 hover:border-slate-400 font-medium transition-colors text-[11px] shadow-2xs"
-          >
-            <span>ImgBB</span>
+            <span>https://imgto.link/</span>
             <ExternalLink className="w-3 h-3" />
           </a>
         </div>
         <ul className="list-disc list-inside space-y-0.5 text-[11px] text-slate-500 pt-1">
-          <li>Upload your poster on <strong>Postimages</strong> or <strong>ImgBB</strong>, copy the direct image URL, and paste it above.</li>
+          <li>Upload your poster on <a href="https://imgto.link/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-semibold">https://imgto.link/</a>, copy the direct image URL, and paste it above.</li>
           <li>Or share a <strong>Google Drive</strong> image link set to <em>"Anyone with the link can view"</em>.</li>
         </ul>
       </div>

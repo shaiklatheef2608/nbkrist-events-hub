@@ -154,7 +154,7 @@ export const PaymentBlockView: React.FC<PaymentBlockViewProps> = ({
             <input
               type="url"
               disabled={readOnly}
-              placeholder="https://i.postimg.cc/... or public Google Drive link"
+              placeholder="https://imgto.link/... or public Google Drive link"
               value={screenshotUrl}
               onChange={(e) => {
                 setScreenshotError(false);
