@@ -88,3 +88,5 @@ npm run build
 ## 🔗 Institutional Administration
 * **Domain Administrator Email**: `shaiklatheef2608@gmail.com`
 * **Institutuion**: N.B.K.R. Institute of Science and Technology (NBKRIST), Autonomous, Estd. 1979.
+*
+Website link-  https://nbkrist-events-hub.ai.studio
