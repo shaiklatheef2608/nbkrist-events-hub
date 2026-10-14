@@ -60,12 +60,14 @@ npm install
 Create a `firebase-applet-config.json` file in the root folder with your Firebase app credentials:
 ```json
 {
-  "apiKey": "YOUR_API_KEY",
-  "authDomain": "YOUR_AUTH_DOMAIN",
-  "projectId": "YOUR_PROJECT_ID",
-  "storageBucket": "YOUR_STORAGE_BUCKET",
-  "messagingSenderId": "YOUR_SENDER_ID",
-  "appId": "YOUR_APP_ID"
+ {
+  "apiKey": "YOUR_ACTUAL_API_KEY",
+  "authDomain": "nbkrist-events-hub.firebaseapp.com",
+  "projectId": "nbkrist-events-hub",
+  "storageBucket": "nbkrist-events-hub.firebasestorage.app",
+  "messagingSenderId": "402455512554",
+  "appId": "1:402455512554:web:9ff5e64db5786bb5b8de93"
+}
 }
 ```
 
